@@ -1,19 +1,14 @@
 import React from "react";
-import { Route, Redirect } from "react-router-dom";
+import { Route, Redirect, RouteProps } from "react-router-dom";
 import { useAppContext } from "../libs/contextLib";
 
-// interface IProps {
-//   children: any;
-//   rest?: {
-//     [x: string]: any;
-//   };
-//   exact: boolean;
-//   path: string
-// }
+interface AuthenticateRouteProps extends RouteProps {}
 
-const AuthenticatedRoute: React.FunctionComponent = ({ children, ...rest }) => {
-  const {isAuthenticated }= useAppContext();
-  return <Route {...rest}>{isAuthenticated ? children : <Redirect to="/" />}</Route>;
+const AuthenticatedRoute: React.FunctionComponent<AuthenticateRouteProps> = ({ ...rest }) => {
+  const { isAuthenticated } = useAppContext();
+
+  if (isAuthenticated) return <Redirect to="/" />;
+  return <Route {...rest} />;
 };
 
 export default AuthenticatedRoute;
