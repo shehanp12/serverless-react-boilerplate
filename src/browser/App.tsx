@@ -1,24 +1,38 @@
 import "./App.css";
+import React, { useEffect, useState } from "react";
+import { Auth } from "aws-amplify";
+import { AppContext } from "./libs/contextLib";
+import { onError } from "./libs/errorLib";
+import Routes from "./Routes";
 
-import React from "react";
+const App: React.FunctionComponent = () => {
+  const [isAuthenticating, setIsAuthenticating] = useState(true);
+  const [isAuthenticated, userHasAuthenticated] = useState(false);
 
-import useConfig from "../components/useConfig";
-import logo from "./logo.svg";
+  useEffect(() => {
+    onLoad();
+  }, []);
 
-/**
- * Our Web Application
- */
-export default function App() {
-  const config = useConfig();
+  async function onLoad() {
+    try {
+      await Auth.currentSession();
+      userHasAuthenticated(true);
+    } catch (e) {
+      if (e !== "No current user") {
+        onError(e);
+      }
+    }
+
+    setIsAuthenticating(false);
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <h1 className="App-title">Welcome to {config.app.TITLE}</h1>
-      </header>
-      <p className="App-intro">
-        To get started, edit <code>src/browser/App.jsx</code> and save to reload.
-      </p>
+    <div>
+      <AppContext.Provider value={{ isAuthenticated, userHasAuthenticated }}>
+        <Routes />
+      </AppContext.Provider>
     </div>
   );
-}
+};
+
+export default App;

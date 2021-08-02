@@ -1,33 +1,35 @@
-// Load polyfills (once, on the top of our web app)
-import 'core-js/stable'
-import 'regenerator-runtime/runtime'
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+import { Amplify } from 'aws-amplify';
+import config from './config';
+import { BrowserRouter as Router } from 'react-router-dom';
 
-import "./index.css";
+Amplify.configure({
+  Auth: {
+    mandatorySignIn: true,
+    region: config.cognito.REGION,
+    userPoolId: config.cognito.USER_POOL_ID,
+    identityPoolId: config.cognito.IDENTITY_POOL_ID,
+    userPoolWebClientId: config.cognito.APP_CLIENT_ID
+  },
 
-/**
- * Frontend code running in browser
- */
-import React from "react";
-import { hydrate } from "react-dom";
+  API: {
+    endpoints: [
+      {
+        name: 'svcApi-supportCoordination',
+        endpoint: config.apiGateway.URL,
+        region: config.apiGateway.REGION
+      }
+    ]
+  }
+});
 
-import ConfigContext from "../components/ConfigContext";
-import { Config } from "../server/config";
-import App from "./App";
-
-const config = (window as any).__CONFIG__ as Config
-delete (window as any).__CONFIG__
-
-/** Components added here will _only_ be loaded in the web browser, never for server-side rendering */
-const render = () => {
-  hydrate(
-    <>
-      {/* The configuration is the outmost component. This allows us to read the configuration even in the theme */}
-      <ConfigContext.Provider value={config}>
-          <App />
-      </ConfigContext.Provider>
-    </>,
-    document.getElementById('root')
-  )
-}
-
-render()
+ReactDOM.render(
+  <React.StrictMode>
+    <Router>
+      <App />
+    </Router>
+  </React.StrictMode>,
+  document.getElementById('root')
+);
